@@ -1,0 +1,8 @@
+[[d1_databases]]
+binding = "DB"
+database_name = "app-db"
+database_id = "45f9ac6a-7abc-4766-82ee-64641731aeb2"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "images-bucket"
