@@ -15,7 +15,7 @@ export const meta: MetaFunction = () => {
 
 export async function action({ request }: ActionFunctionArgs) {
   const { title, task } = await zx.parseForm(request, {
-    title: z.string().email(),
+    title: z.string(),
     task: z.string().min(6),
   });
   console.log(title, task);
@@ -27,7 +27,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 export default function Index() {
   return (
-    <div>
+    <div className="">
       <h1>hi</h1>
     </div>
   );
