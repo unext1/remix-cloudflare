@@ -9,7 +9,7 @@
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "wrangler pages dev --compatibility-date=2023-12-20 ./public",
     "typecheck": "tsc",
-    "pages:deploy": "yarn build && wrangler pages deploy ./public"
+    "pages:deploy": "npm run build && wrangler pages deploy ./public"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.4.0",
