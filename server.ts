@@ -28,6 +28,7 @@ const getLoadContext = (
     env: context.env as Env,
     cookie,
     csrf,
+    db: "asd",
   };
 };
 
