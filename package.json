@@ -16,6 +16,8 @@
     "local:migrations:apply": "wrangler d1 migrations apply app-db --local"
   },
   "dependencies": {
+    "@conform-to/react": "^0.9.1",
+    "@conform-to/zod": "^0.9.1",
     "@remix-run/cloudflare": "^2.4.0",
     "@remix-run/cloudflare-pages": "^2.4.0",
     "@remix-run/css-bundle": "^2.4.0",

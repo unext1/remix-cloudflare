@@ -1,14 +1,29 @@
+import { conform, useForm } from "@conform-to/react";
+import { getFieldsetConstraint, parse } from "@conform-to/zod";
 import {
   json,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
   type MetaFunction,
+  redirect,
 } from "@remix-run/cloudflare";
-import { Form, useLoaderData } from "@remix-run/react";
+import {
+  isRouteErrorResponse,
+  useActionData,
+  useLoaderData,
+  useLocation,
+  useRouteError,
+} from "@remix-run/react";
 import { z } from "zod";
-import { zx } from "zodix";
+import { CustomForm } from "~/components/custom-form";
 import { db } from "~/db/client.server";
 import { todoTable } from "~/db/schema";
+import { zodAction } from "~/utils/zod-action.server";
+
+const schema = z.object({
+  title: z.string(),
+  task: z.string(),
+});
 
 export const meta: MetaFunction = () => {
   return [
@@ -18,71 +33,108 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ context, request }: ActionFunctionArgs) {
-  const { title, task } = await zx.parseForm(request, {
-    title: z.string(),
-    task: z.string(),
+  return zodAction({
+    request,
+    context,
+    schema,
+    cb: async ({ data: { title, task } }) => {
+      await db(context.env.DB).insert(todoTable).values({
+        title,
+        task,
+      });
+
+      throw redirect("/");
+    },
   });
-
-  try {
-    const todo = await db(context.env.DB).insert(todoTable).values({
-      title,
-      task,
-    });
-
-    return json(todo);
-  } catch (e: any) {
-    console.log({
-      message: e.message,
-      cause: e.cause.message,
-    });
-  }
-  return {};
 }
 
 export async function loader({ context }: LoaderFunctionArgs) {
-  try {
-    const todos = await db(context.env.DB).select().from(todoTable);
+  const todos = await db(context.env.DB).select().from(todoTable);
 
-    return json(todos);
-  } catch (e: any) {
-    console.log({
-      message: e.message,
-      cause: e.cause.message,
-    });
-  }
-  return {};
+  return json(todos);
 }
 
 export default function Index() {
   const todos = useLoaderData<typeof loader>();
+
+  const lastSubmission = useActionData<typeof action>();
+
+  const location = useLocation();
+
+  const [form, { title, task }] = useForm({
+    lastSubmission: lastSubmission?.conform
+      ? lastSubmission.conform
+      : undefined,
+    onValidate: ({ formData }) => parse(formData, { schema }),
+    constraint: getFieldsetConstraint(schema),
+    shouldRevalidate: "onBlur",
+  });
+
   return (
     <div className="mx-auto container ">
-      <Form method="post" className="mt-10">
+      <CustomForm
+        method="post"
+        className="mt-10"
+        {...form.props}
+        key={location.key}
+      >
         <label className="block text-xs mb-0.5 mt-2 uppercase font-semibold leading-6 text-gray-400">
           Title
         </label>
-        <input
-          type="text"
-          name="title"
-          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:outline-none px-4 focus:ring-blue-400 sm:text-sm sm:leading-6"
-        />
+        <input type="text" {...conform.input(title)} />
+        {title.error && (
+          <p className="text-red-400 mt-2 uppercase text-sm">{title.error}</p>
+        )}
         <label className="block text-xs mb-0.5 mt-2 uppercase font-semibold leading-6 text-gray-400">
           Task
         </label>
-        <input
-          type="text"
-          name="task"
-          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:outline-none px-4 focus:ring-blue-400 sm:text-sm sm:leading-6"
-        />
-        <button
-          type="submit"
-          className="relative mt-8 py-2 px-6 w-full bg-blue-400 rounded-xl text-white transition hover:bg-blue-500"
-        >
-          Create
-        </button>
-      </Form>
+        <input type="text" {...conform.input(task)} />
+        {task.error && (
+          <p className="text-red-400 mt-2 uppercase text-sm">{task.error}</p>
+        )}
+        <div className="flex space-x-4 mb-12">
+          <button
+            type="submit"
+            className="relative mt-8 py-2 px-6 bg-blue-400 rounded-xl text-white transition hover:bg-blue-500"
+          >
+            Create
+          </button>
+          <button
+            type="reset"
+            className="relative mt-8 py-2 px-6 bg-red-400 rounded-xl text-white transition hover:bg-red-500"
+          >
+            Reset
+          </button>
+        </div>
+      </CustomForm>
 
       <pre className="text-white">{JSON.stringify(todos, null, 2)}</pre>
     </div>
   );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div>
+        <h1>
+          {error.status} {error.statusText}
+        </h1>
+        <p>{error.data}</p>
+      </div>
+    );
+  } else if (error instanceof Error) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>{error.message}</p>
+        <p>The stack trace is:</p>
+        <pre>{error.stack}</pre>
+      </div>
+    );
+  } else {
+    return <h1>Unknown Error</h1>;
+  }
 }

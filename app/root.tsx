@@ -1,4 +1,8 @@
-import type { LinksFunction } from "@remix-run/cloudflare";
+import {
+  json,
+  type LinksFunction,
+  type LoaderFunctionArgs,
+} from "@remix-run/cloudflare";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import {
   Links,
@@ -7,7 +11,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
+import { AuthenticityTokenProvider } from "remix-utils/csrf/react";
 
 import tailwind from "~/tailwind.css";
 
@@ -16,7 +22,14 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: tailwind },
 ];
 
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const [token, cookieHeader] = await context.csrf.commitToken(request);
+  return json({ token }, { headers: { "set-cookie": cookieHeader || "" } });
+}
+
 export default function App() {
+  const { token } = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -26,7 +39,9 @@ export default function App() {
         <Links />
       </head>
       <body className="bg-slate-950">
-        <Outlet />
+        <AuthenticityTokenProvider token={token}>
+          <Outlet />
+        </AuthenticityTokenProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
