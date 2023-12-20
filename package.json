@@ -12,7 +12,8 @@
     "pages:deploy": "npm run build && wrangler pages deploy ./public",
     "migrations:gen": "drizzle-kit generate:sqlite",
     "migrations:up": "drizzle-kit up:sqlite",
-    "migrations:apply": "wrangler d1 migrations apply app-db"
+    "migrations:apply": "wrangler d1 migrations apply app-db",
+    "local:migrations:apply": "wrangler d1 migrations apply app-db --local"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.4.0",

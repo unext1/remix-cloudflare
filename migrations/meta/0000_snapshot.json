@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "56081e8e-8504-45a9-a4c6-9aea30fd58ff",
+  "id": "b6ed9189-80e9-4042-9d7a-c3faa9e7cca7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "todo": {
@@ -10,9 +10,9 @@
         "id": {
           "name": "id",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
         },
         "title": {
           "name": "title",
@@ -28,11 +28,19 @@
           "notNull": false,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
+        "done": {
+          "name": "done",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false,
           "default": "CURRENT_TIMESTAMP"
         }
