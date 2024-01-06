@@ -11,6 +11,10 @@ import { isRouteErrorResponse, useActionData, useLoaderData, useLocation, useRou
 import { z } from 'zod';
 
 import { CustomForm } from '~/components/custom-form';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { H1, H4, P } from '~/components/ui/typography';
 import { db } from '~/db/client.server';
 import { todoTable } from '~/db/schema';
 import { zodAction } from '~/utils/zod-action.server';
@@ -65,42 +69,34 @@ export default function Index() {
   return (
     <div className="mx-auto container ">
       <pre className="text-white">{JSON.stringify(user, null, 4)}</pre>
-      <CustomForm method="post" className="mt-10" {...form.props} key={location.key}>
-        <label htmlFor={title.id} className="block text-xs mb-0.5 mt-2 uppercase font-semibold leading-6 text-gray-400">
-          Title
-        </label>
-        <input type="text" {...conform.input(title)} />
-        {title.error && <p className="text-red-400 mt-2 uppercase text-sm">{title.error}</p>}
-        <label htmlFor={task.id} className="block text-xs mb-0.5 mt-2 uppercase font-semibold leading-6 text-gray-400">
-          Task
-        </label>
-        <input type="text" {...conform.input(task)} />
-        {task.error && <p className="text-red-400 mt-2 uppercase text-sm">{task.error}</p>}
+      <CustomForm method="post" className="mt-10 space-y-4" {...form.props} key={location.key}>
+        <div>
+          <Label htmlFor={title.id}>Title</Label>
+          <Input type="text" {...conform.input(title)} />
+          {title.error && <p className="text-red-400 mt-2 uppercase text-sm">{title.error}</p>}
+        </div>
+        <div>
+          <Label htmlFor={task.id}>Task</Label>
+          <Input type="text" {...conform.input(task)} />
+          {task.error && <p className="text-red-400 mt-2 uppercase text-sm">{task.error}</p>}
+        </div>
         <div className="flex space-x-4 mb-12">
-          <button
-            type="submit"
-            className="relative mt-8 py-2 px-6 bg-blue-400 rounded-xl text-white transition hover:bg-blue-500"
-          >
-            Create
-          </button>
-          <button
-            type="reset"
-            className="relative mt-8 py-2 px-6 bg-red-400 rounded-xl text-white transition hover:bg-red-500"
-          >
+          <Button type="submit">Create</Button>
+          <Button type="reset" variant="destructive">
             Reset
-          </button>
+          </Button>
         </div>
       </CustomForm>
 
       <div className="grid grid-cols-4 gap-6">
         {todos.map((todo) => (
-          <div className="bg-slate-900 text-white p-4 rounded-2xl" key={todo.id}>
-            <div className="flex justify-between mb-2">
-              <h1 className="uppercase text-lg font-semibold my-auto">{todo.task}</h1>
-              <button className="bg-red-500 text-white py-1 px-2 rounded-xl my-auto text-sm font-semibold">X</button>
+          <div className="bg-card p-4 rounded-2xl" key={todo.id}>
+            <div className="flex justify-between">
+              <H4>{todo.task}</H4>
+              <Button variant="ghost">X</Button>
             </div>
-            <p className="text-slate-300">{todo.title}</p>
-            <p className="mt-4 text-xs text-slate-400">{todo.createdAt}</p>
+            <P className="">{todo.title}</P>
+            <P className="text-xs">{todo.createdAt}</P>
           </div>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { Form as RemixForm, Link as RemixLink, useLocation, type FormProps as RFormProps } from '@remix-run/react';
+import { Form as RemixForm, type FormProps as RFormProps } from '@remix-run/react';
 import { forwardRef } from 'react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 
@@ -22,7 +22,7 @@ export type CustomFormProps = RFormProps & {
 };
 
 export const CustomForm = forwardRef<HTMLFormElement, CustomFormProps>(
-  ({ children, as, actionId, redirectTo, autoFooter, method = 'post', ...props }, ref) => {
+  ({ children, as, method = 'post', ...props }, ref) => {
     const Form = as || RemixForm;
 
     return (

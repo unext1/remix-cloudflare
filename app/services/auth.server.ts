@@ -4,6 +4,10 @@ import { GoogleStrategy } from 'remix-auth-google';
 
 import { type Env } from 'server';
 
+const requireUser = () => {
+  return {};
+};
+
 export const authSession = (env: Env) => {
   const sessionStorage = createCookieSessionStorage({
     cookie: {
