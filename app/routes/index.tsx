@@ -16,7 +16,8 @@ import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { H1, H4, P } from '~/components/ui/typography';
 import { db } from '~/db/client.server';
-import { todoTable } from '~/db/schema';
+import { todoTable, userTable } from '~/db/schema';
+import { requireUser } from '~/services/auth.server';
 import { zodAction } from '~/utils/zod-action.server';
 
 const schema = z.object({
@@ -44,10 +45,10 @@ export function action({ context, request }: ActionFunctionArgs) {
   });
 }
 
-export async function loader({ context, request }: LoaderFunctionArgs) {
+export async function loader({ context, params, request }: LoaderFunctionArgs) {
   const todos = await db(context.env.DB).select().from(todoTable);
 
-  const user = await context.session.isAuthenticated(request);
+  const user = await requireUser({ request, context });
 
   return json({ todos, user });
 }
