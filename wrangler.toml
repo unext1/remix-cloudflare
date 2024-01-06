@@ -1,7 +1,7 @@
 [[d1_databases]]
 binding = "DB"
 database_name = "app-db"
-database_id = "e1313807-6a23-4b03-84af-4b190df4fdd6"
+database_id = "670c2dbf-b3c5-4c4f-b992-99f6ced0d439"
 
 [[r2_buckets]]
 binding = "IMAGES"

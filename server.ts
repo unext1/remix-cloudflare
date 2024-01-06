@@ -1,6 +1,7 @@
 import { logDevReady } from '@remix-run/cloudflare';
 import { createPagesFunctionHandler } from '@remix-run/cloudflare-pages';
 import * as build from '@remix-run/dev/server-build';
+import { z } from 'zod';
 
 import { authSession } from '~/services/auth.server';
 import { csrfToken, sessionCookie } from '~/services/session.server';
@@ -9,13 +10,22 @@ if (process.env.NODE_ENV === 'development') {
   logDevReady(build);
 }
 
-export interface Env {
+const validateEnv = (env: unknown) => {
+  const envSchema = z.object({
+    SESSION_SECRET: z.string().min(1),
+    CSRF_SECRET: z.string().min(1),
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1)
+  });
+
+  return envSchema.parse(env);
+};
+
+type EnvVars = ReturnType<typeof validateEnv>;
+
+export interface Env extends EnvVars {
   DB: D1Database;
   IMAGES: R2Bucket;
-  SESSION_SECRET: string;
-  CSRF_SECRET: string;
-  GOOGLE_CLIENT_ID: string;
-  GOOGLE_CLIENT_SECRET: string;
 }
 
 declare module '@remix-run/server-runtime' {
@@ -24,12 +34,14 @@ declare module '@remix-run/server-runtime' {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getLoadContext = (context: EventContext<any, any, Record<string, unknown>>) => {
-  const csrf = csrfToken(context.env.SESSION_SECRET, context.env.CSRF_SECRET);
-  const cookie = sessionCookie(context.env.SESSION_SECRET);
-  const session = authSession(context.env.SESSION_SECRET);
+  validateEnv(context.env);
+  const env = context.env as Env;
+  const csrf = csrfToken(env.SESSION_SECRET, env.CSRF_SECRET);
+  const cookie = sessionCookie(env.SESSION_SECRET);
+  const session = authSession(env);
 
   return {
-    env: context.env as Env,
+    env,
     cookie,
     session,
     csrf
