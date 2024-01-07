@@ -7,17 +7,17 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction
 } from '@remix-run/cloudflare';
-import { isRouteErrorResponse, useActionData, useLoaderData, useLocation, useRouteError } from '@remix-run/react';
+import { Link, isRouteErrorResponse, useActionData, useLoaderData, useLocation, useRouteError } from '@remix-run/react';
+import { $path } from 'remix-routes';
 import { z } from 'zod';
 
 import { CustomForm } from '~/components/custom-form';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { H1, H4, P } from '~/components/ui/typography';
+import { H2, H4, P } from '~/components/ui/typography';
 import { db } from '~/db/client.server';
-import { todoTable, userTable } from '~/db/schema';
-import { requireUser } from '~/services/auth.server';
+import { todoTable } from '~/db/schema';
 import { zodAction } from '~/utils/zod-action.server';
 
 const schema = z.object({
@@ -45,16 +45,14 @@ export function action({ context, request }: ActionFunctionArgs) {
   });
 }
 
-export async function loader({ context, params, request }: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
   const todos = await db(context.env.DB).select().from(todoTable);
 
-  const user = await requireUser({ request, context });
-
-  return json({ todos, user });
+  return json({ todos });
 }
 
 export default function Index() {
-  const { todos, user } = useLoaderData<typeof loader>();
+  const { todos } = useLoaderData<typeof loader>();
 
   const lastSubmission = useActionData<typeof action>();
 
@@ -68,16 +66,25 @@ export default function Index() {
   });
 
   return (
-    <div className="mx-auto container ">
-      <pre className="text-white">{JSON.stringify(user, null, 4)}</pre>
+    <div className="mx-auto container">
+      <Link to={$path('/login')}>
+        <Button variant="default" className="my-8">
+          Login
+        </Button>
+      </Link>
+      <H2>Todos</H2>
       <CustomForm method="post" className="mt-10 space-y-4" {...form.props} key={location.key}>
         <div>
-          <Label htmlFor={title.id}>Title</Label>
+          <Label htmlFor={title.id} className="text-xs uppercase">
+            Title
+          </Label>
           <Input type="text" {...conform.input(title)} />
           {title.error && <p className="text-red-400 mt-2 uppercase text-sm">{title.error}</p>}
         </div>
         <div>
-          <Label htmlFor={task.id}>Task</Label>
+          <Label htmlFor={task.id} className="text-xs uppercase">
+            Task
+          </Label>
           <Input type="text" {...conform.input(task)} />
           {task.error && <p className="text-red-400 mt-2 uppercase text-sm">{task.error}</p>}
         </div>

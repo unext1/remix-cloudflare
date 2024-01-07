@@ -1,4 +1,4 @@
-import { type LoaderFunctionArgs, createCookieSessionStorage, redirect, AppLoadContext } from '@remix-run/cloudflare';
+import { createCookieSessionStorage, redirect, type AppLoadContext } from '@remix-run/cloudflare';
 import { Authenticator } from 'remix-auth';
 import { GoogleStrategy } from 'remix-auth-google';
 import { $path } from 'remix-routes';
@@ -56,9 +56,12 @@ export const requireUser = async ({ request, context }: { request: Request; cont
   const sessionUserId = await context.session.isAuthenticated(request);
 
   const sessionUser = await getUser({ userId: sessionUserId, context });
+
   if (sessionUser) {
     return sessionUser;
-  } else redirect($path('/'));
+  } else {
+    throw redirect($path('/'));
+  }
 };
 
 export const authSession = (env: Env) => {

@@ -18,7 +18,7 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 
 export default function AuthenticationPage() {
   return (
-    <div>
+    <div className="mx-auto container">
       <Form method="post">
         <Button type="submit">Google</Button>
       </Form>

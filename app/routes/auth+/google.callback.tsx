@@ -4,6 +4,6 @@ import { $path } from 'remix-routes';
 export function loader({ context, request }: LoaderFunctionArgs) {
   return context.session.authenticate('google', request, {
     failureRedirect: $path('/login'),
-    successRedirect: $path('/')
+    successRedirect: $path('/app')
   });
 }
