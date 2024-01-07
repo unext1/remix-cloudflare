@@ -43,11 +43,20 @@ const getUser = async ({ userId, context }: { userId: string | null | unknown; c
   if (!userId) {
     return undefined;
   }
-  const user = await db(context.env.DB)
-    .select()
-    .from(userTable)
-    .where(eq(userTable.id, Number(userId)));
-  return user[0];
+  // const user = await db(context.env.DB)
+  //   .select()
+  //   .from(userTable)
+  //   .where(eq(userTable.id, Number(userId)));
+  // return user[0];
+
+  const user = await db(context.env.DB).query.userTable.findFirst({
+    with: {
+      workplaces: true
+    },
+    where: eq(userTable.id, Number(userId))
+  });
+
+  return user;
 };
 
 export type SessionUser = Awaited<ReturnType<typeof requireUser>>;

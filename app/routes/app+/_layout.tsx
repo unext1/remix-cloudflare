@@ -1,6 +1,5 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { Outlet, useLoaderData } from '@remix-run/react';
-import { H3 } from '~/components/ui/typography';
+import { type LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { Outlet } from '@remix-run/react';
 import { requireUser } from '~/services/auth.server';
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {

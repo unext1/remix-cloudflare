@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { sqliteTable, text, integer, unique } from 'drizzle-orm/sqlite-core';
 
 export const todoTable = sqliteTable('todo', {
@@ -30,3 +30,28 @@ export const userTable = sqliteTable(
     };
   }
 );
+
+export const workplaceTable = sqliteTable('workplace', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name'),
+  createdAt: text('created_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: text('updated_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  userId: integer('user_id')
+    .references(() => userTable.id)
+    .notNull()
+});
+
+export const usersRelations = relations(userTable, ({ many }) => ({
+  workplaces: many(workplaceTable)
+}));
+
+export const workplaceRelations = relations(workplaceTable, ({ one }) => ({
+  owner: one(userTable, {
+    fields: [workplaceTable.userId],
+    references: [userTable.id]
+  })
+}));

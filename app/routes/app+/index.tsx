@@ -1,8 +1,51 @@
-import { type LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { Form, json, useLoaderData } from '@remix-run/react';
+import { conform, useForm } from '@conform-to/react';
+import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { Form, Link, useActionData, useLoaderData, useLocation } from '@remix-run/react';
 import { $path } from 'remix-routes';
+import { z } from 'zod';
+import { CustomForm } from '~/components/custom-form';
 import { Button } from '~/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '~/components/ui/dialog';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { db } from '~/db/client.server';
+import { workplaceTable } from '~/db/schema';
 import { requireUser } from '~/services/auth.server';
+import { zodAction } from '~/utils/zod-action.server';
+
+const schema = z.object({
+  name: z.string(),
+  userId: z.number()
+});
+
+export function action({ context, request }: ActionFunctionArgs) {
+  return zodAction({
+    request,
+    context,
+    schema,
+    cb: async ({ data: { name, userId } }) => {
+      const workplace = await db(context.env.DB)
+        .insert(workplaceTable)
+        .values({
+          name,
+          userId
+        })
+        .returning({
+          id: workplaceTable.id
+        });
+
+      throw redirect($path('/app/workpalce/:workplaceId', { workplaceId: workplace[0].id }));
+    }
+  });
+}
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const user = await requireUser({ request, context });
@@ -10,11 +53,56 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 };
 
 const AppPage = () => {
-  const user = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
+
+  const lastSubmission = useActionData<typeof action>();
+
+  const location = useLocation();
+
+  const [form, { name, userId }] = useForm({
+    lastSubmission: lastSubmission?.conform ? lastSubmission.conform : undefined,
+    onValidate: ({ formData }) => parse(formData, { schema }),
+    constraint: getFieldsetConstraint(schema),
+    shouldRevalidate: 'onBlur'
+  });
   return (
     <div>
       <pre>{JSON.stringify(user, null, 4)}</pre>
       <h1>App page</h1>
+      <div className="flex space-x-6">
+        {user.workplaces.map((workplace) => (
+          <Link key={workplace.id} to={$path('/app/workpalce/:workplaceId', { workplaceId: Number(workplace.id) })}>
+            <Button variant="secondary">{workplace.name}</Button>
+          </Link>
+        ))}
+      </div>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="secondary" className="mt-6">
+            Create Workplace
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Workplace</DialogTitle>
+            <DialogDescription>Make changes to your profile here. Click save when you&apos;re done.</DialogDescription>
+          </DialogHeader>
+
+          <CustomForm method="post" className="grid gap-4 py-4" {...form.props} key={location.key}>
+            <div className="grid grid-cols-6 items-center gap-4">
+              <Input {...conform.input(userId)} type="hidden" value={user.id} />
+              <Label htmlFor={name.id} className="text-right col-span-2 text-sm whitespace-nowrap w-fit">
+                Workplace Name
+              </Label>
+              <Input {...conform.input(name)} placeholder="Workplace Name" className="col-span-4" />
+              {name.error && <p className="text-red-400 mt-2 uppercase text-sm">{name.error}</p>}
+            </div>
+            <Button type="submit">Save changes</Button>
+          </CustomForm>
+        </DialogContent>
+      </Dialog>
+
       <Form method="post" className="mt-6" action={$path('/auth/logout')}>
         <Button variant="destructive">Logout</Button>
       </Form>
