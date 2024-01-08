@@ -1,60 +1,60 @@
-import {
-  type ActionFunctionArgs,
-  json,
-  unstable_composeUploadHandlers,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-  type LoaderFunctionArgs
-} from '@remix-run/cloudflare';
+import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { Form, useLoaderData } from '@remix-run/react';
+import { eq } from 'drizzle-orm';
+import { $path } from 'remix-routes';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
+import { H1, H2 } from '~/components/ui/typography';
+import { db } from '~/db/client.server';
+import { imageTable } from '~/db/schema';
 import { requireUser } from '~/services/auth.server';
 import { getWorkplace } from '~/services/workplace.server';
 
 export const loader = async ({ request, params, context }: LoaderFunctionArgs) => {
   const user = await requireUser({ request, context });
-  const object = await context.env.IMAGES.get('laurynas.jpg');
-  console.log(object?.body);
+
+  const userImages = await db(context.env.DB).query.imageTable.findMany({
+    where: eq(imageTable.userId, user.id)
+  });
 
   const workplace = await getWorkplace({ userId: user.id, workplaceId: Number(params.workplaceId), context });
-  return json({ user, workplace });
+  return json({ user, workplace, userImages });
 };
 
-export async function action({ request, context }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  console.log('request', request);
-  const image = formData.get('image');
-  console.log('image', image);
-  const uploadedImage = await context.env.IMAGES.put('kazkas.jpg', image);
-  console.log('uploaded image', uploadedImage);
-
-  return {};
-}
-
-// export async function action({ request, context }: ActionFunctionArgs) {
-//   console.log(request.body);
-//   const formData = await request.formData();
-//   const key = formData.get('image') as string;
-//   // const uploadedImage = await context.env.IMAGES.put(key, '');
-//   // console.log(uploadedImage);
-
-//   return {};
-// }
-
 const WorkplacePage = () => {
-  const { user, workplace } = useLoaderData<typeof loader>();
+  const { user, workplace, userImages } = useLoaderData<typeof loader>();
+
   return (
     <div>
-      <h1>Welcome to your workplace</h1>
-      <pre>{JSON.stringify(workplace, null, 4)} </pre>
+      <H1 className="mb-2">Welcome to your Workplace</H1>
+      <pre>{JSON.stringify(workplace, null, 4)}</pre>
 
-      <Form method="post" encType="multipart/form-data">
+      <H2 className="mt-6 mb-2">Galery</H2>
+      <Form method="post" encType="multipart/form-data" action={$path('/api/images')}>
         <Input type="file" name="image" />
-        <Button variant="secondary" type="submit">
+        <Button variant="secondary" type="submit" size="sm" className="mt-2">
           Submit
         </Button>
       </Form>
+
+      <div className="grid grid-cols-5 gap-6 mt-6">
+        {userImages.map((image) => (
+          <Form method="delete" key={image.id} action={$path('/api/images/:imageId', { imageId: image.id })}>
+            <input name="imageId" type="hidden" value={image.id} />
+            <div className="relative">
+              <Button className="absolute top-2 z-10 right-2" type="submit" size="sm" variant="destructive">
+                Delete
+              </Button>
+              <img
+                key={image.id}
+                src={$path('/api/images/:imageId', { imageId: image.id })}
+                alt=""
+                className="h-52 object-cover w-full"
+              />
+            </div>
+          </Form>
+        ))}
+      </div>
     </div>
   );
 };

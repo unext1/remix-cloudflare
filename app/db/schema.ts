@@ -45,13 +45,31 @@ export const workplaceTable = sqliteTable('workplace', {
     .notNull()
 });
 
+export const imageTable = sqliteTable('image', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  contentType: text('content_type').notNull(),
+  size: integer('size').notNull(),
+  filePath: text('file_path').notNull(),
+  userId: integer('user_id')
+    .references(() => userTable.id)
+    .notNull()
+});
+
 export const usersRelations = relations(userTable, ({ many }) => ({
-  workplaces: many(workplaceTable)
+  workplaces: many(workplaceTable),
+  images: many(imageTable)
 }));
 
 export const workplaceRelations = relations(workplaceTable, ({ one }) => ({
   owner: one(userTable, {
     fields: [workplaceTable.userId],
+    references: [userTable.id]
+  })
+}));
+
+export const imageRelations = relations(imageTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [imageTable.userId],
     references: [userTable.id]
   })
 }));

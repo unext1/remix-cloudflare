@@ -1,10 +1,9 @@
 import { logDevReady } from '@remix-run/cloudflare';
 import { createPagesFunctionHandler } from '@remix-run/cloudflare-pages';
 import * as build from '@remix-run/dev/server-build';
-import { drizzle } from 'drizzle-orm/libsql';
 import { z } from 'zod';
 
-import { authSession, createOrUpdateUser } from '~/services/auth.server';
+import { authSession } from '~/services/auth.server';
 import { csrfToken, sessionCookie } from '~/services/session.server';
 
 if (process.env.NODE_ENV === 'development') {
