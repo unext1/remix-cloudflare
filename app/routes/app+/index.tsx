@@ -42,7 +42,7 @@ export function action({ context, request }: ActionFunctionArgs) {
           id: workplaceTable.id
         });
 
-      throw redirect($path('/app/workpalce/:workplaceId', { workplaceId: workplace[0].id }));
+      throw redirect($path('/app/workplace/:workplaceId', { workplaceId: workplace[0].id }));
     }
   });
 }
@@ -71,7 +71,7 @@ const AppPage = () => {
       <h1>App page</h1>
       <div className="flex space-x-6">
         {user.workplaces.map((workplace) => (
-          <Link key={workplace.id} to={$path('/app/workpalce/:workplaceId', { workplaceId: Number(workplace.id) })}>
+          <Link key={workplace.id} to={$path('/app/workplace/:workplaceId', { workplaceId: Number(workplace.id) })}>
             <Button variant="secondary">{workplace.name}</Button>
           </Link>
         ))}
