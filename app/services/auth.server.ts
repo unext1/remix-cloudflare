@@ -43,11 +43,6 @@ const getUser = async ({ userId, context }: { userId: string | null | unknown; c
   if (!userId) {
     return undefined;
   }
-  // const user = await db(context.env.DB)
-  //   .select()
-  //   .from(userTable)
-  //   .where(eq(userTable.id, Number(userId)));
-  // return user[0];
 
   const user = await db(context.env.DB).query.userTable.findFirst({
     with: {
@@ -91,7 +86,7 @@ export const authSession = (env: Env) => {
     {
       clientID: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:8788/auth/google/callback'
+      callbackURL: `${env.SITE_URL}/auth/google/callback`
     },
     ({ profile }) => {
       // Get the user data from your DB or API using the tokens and profile

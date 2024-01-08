@@ -49,7 +49,7 @@ export const imageTable = sqliteTable('image', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   contentType: text('content_type').notNull(),
   size: integer('size').notNull(),
-  filePath: text('file_path').notNull(),
+  filePath: text('file_path').notNull().unique(),
   userId: integer('user_id')
     .references(() => userTable.id)
     .notNull()
