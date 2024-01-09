@@ -5,13 +5,13 @@ import { Button } from '~/components/ui/button';
 
 export async function action({ context, request }: ActionFunctionArgs) {
   return await context.session.authenticate('google', request, {
-    successRedirect: $path('/'),
+    successRedirect: $path('/app'),
     failureRedirect: $path('/login')
   });
 }
 export async function loader({ context, request }: LoaderFunctionArgs) {
   await context.session.isAuthenticated(request, {
-    successRedirect: $path('/')
+    successRedirect: $path('/app')
   });
   return {};
 }

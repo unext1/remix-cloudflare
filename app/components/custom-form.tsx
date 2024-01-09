@@ -26,7 +26,7 @@ export const CustomForm = forwardRef<HTMLFormElement, CustomFormProps>(
     const Form = as || RemixForm;
 
     return (
-      <Form ref={ref} {...props} method={method === 'get' ? 'get' : 'post'}>
+      <Form ref={ref} {...props} method={method}>
         <AuthenticityTokenInput />
         {children}
       </Form>

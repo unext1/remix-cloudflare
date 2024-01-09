@@ -16,6 +16,7 @@ import {
 } from '~/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { H4, P } from '~/components/ui/typography';
 import { db } from '~/db/client.server';
 import { workplaceTable } from '~/db/schema';
 import { requireUser } from '~/services/auth.server';
@@ -68,12 +69,42 @@ const AppPage = () => {
   return (
     <div>
       <pre>{JSON.stringify(user, null, 4)}</pre>
-      <h1>App page</h1>
-      <div className="flex space-x-6">
+      <h1>Workplaces</h1>
+      <div className="grid grid-cols-4 gap-4">
         {user.workplaces.map((workplace) => (
-          <Link key={workplace.id} to={$path('/app/workplace/:workplaceId', { workplaceId: Number(workplace.id) })}>
-            <Button variant="secondary">{workplace.name}</Button>
-          </Link>
+          <div className="bg-card p-4 rounded-xl" key={workplace.id}>
+            <div className="flex justify-between">
+              <H4>{workplace.name}</H4>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    X
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Remove Workplace</DialogTitle>
+                    <DialogDescription>
+                      Are you really really sure you want to delete {workplace.name} workplace ?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <CustomForm method="delete" action={$path('/api/workplace')} navigate={false}>
+                    <Input type="hidden" name="workplaceId" value={workplace.id} />
+                    <Button type="submit" variant="destructive">
+                      Remove Workplace
+                    </Button>
+                  </CustomForm>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <P className="text-sm">{workplace.createdAt}</P>
+            <P className="text-xs">{user.name}</P>
+            <Link to={$path('/app/workplace/:workplaceId', { workplaceId: Number(workplace.id) })}>
+              <Button variant="secondary" className="w-full mt-4">
+                Knock Knock...
+              </Button>
+            </Link>
+          </div>
         ))}
       </div>
 

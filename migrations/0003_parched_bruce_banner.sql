@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `image_file_path_unique` ON `image` (`file_path`);

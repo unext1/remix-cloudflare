@@ -1,4 +1,4 @@
-import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { zx } from 'zodix';
@@ -14,38 +14,38 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
     where: and(eq(imageTable.id, Number(params.imageId)), eq(imageTable.userId, user.id))
   });
 
-  if (dbImage) {
-    const object = await context.env.IMAGES.get(dbImage.filePath);
+  if (!dbImage) return new Response('Not found', { status: 404 });
 
-    if (object) {
-      const headers = new Headers();
-      object.writeHttpMetadata(headers);
-      headers.set('etag', object.httpEtag);
-      // Sutvarkyti
-      headers.set('Content-Type', dbImage.contentType);
+  const object = await context.env.IMAGES.get(dbImage.filePath);
+  if (!object) return new Response('Not found', { status: 404 });
 
-      return new Response(object.body, {
-        headers
-      });
-    }
-    return new Response('Not found', { status: 404 });
-  }
-  return new Response('Not found', { status: 404 });
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set('etag', object.httpEtag);
+  headers.set('Content-Type', dbImage.contentType);
+
+  return new Response(object.body, {
+    headers
+  });
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  if (request.method.toUpperCase() !== 'DELETE') return new Response('Method not allowed', { status: 405 });
+
   const user = await requireUser({ context, request });
   const { imageId } = await zx.parseForm(request, {
     imageId: z.string().min(1, 'Image ID is required').transform(Number)
   });
+  const dbImage = await db(context.env.DB).query.imageTable.findFirst({
+    where: and(eq(imageTable.id, imageId), eq(imageTable.userId, user.id))
+  });
 
-  await db(context.env.DB)
-    .delete(imageTable)
-    .where(and(eq(imageTable.id, imageId), eq(imageTable.userId, user.id)));
+  if (dbImage) {
+    await context.env.IMAGES.delete(dbImage?.filePath);
 
-  const referer = request.headers.get('referer');
-
-  const url = new URL(referer || '/app');
-
-  return redirect(url.pathname);
+    return await db(context.env.DB)
+      .delete(imageTable)
+      .where(and(eq(imageTable.id, imageId), eq(imageTable.userId, user.id)));
+  }
+  return new Response('Not found', { status: 404 });
 }

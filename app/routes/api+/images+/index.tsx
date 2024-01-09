@@ -1,5 +1,5 @@
 import {
-  redirect,
+  json,
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
   type ActionFunctionArgs
@@ -18,6 +18,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const contentType = image.type;
   const size = image.size;
 
+  if (size > 500000) {
+    return json({ error: 'Image is too large', success: false });
+  }
+
   await context.env.IMAGES.put(filePath, image);
 
   await db(context.env.DB).insert(imageTable).values({
@@ -26,10 +30,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
     size,
     userId: user.id
   });
-
-  const referer = request.headers.get('referer');
-
-  const url = new URL(referer || '/app');
-
-  return redirect(url.pathname);
+  return json({ error: null, success: true });
 }
