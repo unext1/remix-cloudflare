@@ -7,14 +7,18 @@ export const TopBar = ({ user }: { user: UserType }) => {
   const navigate = useNavigate();
   const goBack = () => navigate(-1);
   return (
-    <div className="w-full items-center flex mb-6 bg-neutral rounded-xl p-4">
+    <div className="w-full items-center flex mb-6 border-b-2 border-card rounded-xl p-4">
       <Button onClick={goBack} variant="default" size="sm">
-        <ArrowLeftIcon className="w-4" />
+        <ArrowLeftIcon className="w-3 h-4" />
       </Button>
       <div className="flex w-full justify-end">
-        <Link to="settings">
+        <Link to="profile">
           <div className="flex space-x-2 mr-5">
-            <img src="https://thispersondoesnotexist.com" className="h-8 w-8 rounded-full" alt="user" />
+            <img
+              src={user?.imageUrl || 'https://thispersondoesnotexist.com'}
+              className="h-8 w-8 rounded-full"
+              alt="user"
+            />
             <div className="flex flex-col justify-center">
               <div className="font-semibold capitalize text-sm">{user?.name}</div>
             </div>

@@ -33,7 +33,7 @@ const WorkplacePage = () => {
   return (
     <div>
       <H1 className="mb-2">Welcome to your Workplace</H1>
-      <pre>{JSON.stringify(workplace, null, 4)}</pre>
+      <pre className="overflow-x-scroll">{JSON.stringify(workplace, null, 4)}</pre>
 
       <div className="p-4 bg-card mt-2 rounded-xl">
         <H2 className="mt-6 mb-2">Galery</H2>

@@ -32,7 +32,7 @@ export const AppLayout = ({ children, user }: { children: React.ReactNode; user:
 
 const MobileMenu = ({ openSidebar }: { openSidebar: () => void }) => {
   return (
-    <div className="flex justify-end border-t border-neutral 0 px-2 shadow-lg py-safe md:hidden">
+    <div className="flex justify-end border-t px-2 z-10 shadow-lg py-safe md:hidden w-full sticky bottom-0 h-14 bg-card/75">
       <div className="flex p-2">
         <button type="button" className="rounded-md p-2 text-gray-content md:hidden" onClick={openSidebar}>
           <span className="sr-only">Open sidebar</span>

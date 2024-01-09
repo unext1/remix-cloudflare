@@ -99,11 +99,11 @@ const AppPage = () => {
             </div>
             <P className="text-sm">{workplace.createdAt}</P>
             <P className="text-xs">{user.name}</P>
-            <Link to={$path('/app/workplace/:workplaceId', { workplaceId: Number(workplace.id) })}>
-              <Button variant="secondary" className="w-full mt-4">
+            <Button asChild variant="secondary" className="w-full mt-4">
+              <Link to={$path('/app/workplace/:workplaceId', { workplaceId: Number(workplace.id) })}>
                 Knock Knock...
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         ))}
       </div>
