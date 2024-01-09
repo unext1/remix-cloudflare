@@ -37,8 +37,7 @@ export const createOrUpdateUser = async ({
     return;
   }
 };
-
-// type User = Awaited<ReturnType<typeof getUser>>;
+export type UserType = Awaited<ReturnType<typeof getUser>>;
 const getUser = async ({ userId, context }: { userId: string | null | unknown; context: AppLoadContext }) => {
   if (!userId) {
     return undefined;

@@ -1,5 +1,5 @@
 import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { Form, useFetcher, useLoaderData, useLocation, useNavigation } from '@remix-run/react';
+import { useFetcher, useLoaderData, useLocation, useNavigation } from '@remix-run/react';
 import { eq } from 'drizzle-orm';
 import { $path } from 'remix-routes';
 import { Button } from '~/components/ui/button';
@@ -32,7 +32,7 @@ const WorkplacePage = () => {
 
   return (
     <div>
-      <H1 className="mb-2 mt-4">Welcome to your Workplace</H1>
+      <H1 className="mb-2">Welcome to your Workplace</H1>
       <pre>{JSON.stringify(workplace, null, 4)}</pre>
 
       <div className="p-4 bg-card mt-2 rounded-xl">
