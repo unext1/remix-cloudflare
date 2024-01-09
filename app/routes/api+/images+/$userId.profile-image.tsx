@@ -2,12 +2,13 @@ import {
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
   type ActionFunctionArgs,
-  type LoaderFunctionArgs
+  type LoaderFunctionArgs,
+  json
 } from '@remix-run/cloudflare';
 import { eq } from 'drizzle-orm';
 
 import { db } from '~/db/client.server';
-import { imageTable } from '~/db/schema';
+import { imageTable, userTable } from '~/db/schema';
 import { requireUser } from '~/services/auth.server';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
@@ -42,14 +43,26 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const contentType = image.type;
   const size = image.size;
 
+  if (size > 500000) {
+    return json({ error: 'Image is too large', success: false });
+  }
+
   await context.env.IMAGES.put(filePath, image);
 
-  await db(context.env.DB).insert(imageTable).values({
-    contentType,
-    filePath,
-    size,
-    userId: user.id
-  });
+  const dbImage = await db(context.env.DB)
+    .insert(imageTable)
+    .values({
+      contentType,
+      filePath,
+      size,
+      userId: user.id
+    })
+    .returning({ id: imageTable.id });
 
-  return {};
+  await db(context.env.DB)
+    .update(userTable)
+    .set({ imageUrl: `/api/images/${dbImage[0].id}` })
+    .where(eq(userTable.id, user.id));
+
+  return json({ error: null, success: true });
 }

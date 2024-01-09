@@ -2,6 +2,7 @@ import { Form, Link, useNavigate } from '@remix-run/react';
 import { ArrowLeftIcon, DoorOpenIcon } from 'lucide-react';
 import { type UserType } from '~/services/auth.server';
 import { Button } from './ui/button';
+import { $path } from 'remix-routes';
 
 export const TopBar = ({ user }: { user: UserType }) => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export const TopBar = ({ user }: { user: UserType }) => {
         <Link to="profile">
           <div className="flex space-x-2 mr-5">
             <img
-              src={user?.imageUrl || 'https://thispersondoesnotexist.com'}
+              src={$path('/api/images/:userId/profile-image', { userId: user?.id || '' })}
               className="h-8 w-8 rounded-full"
               alt="user"
             />
