@@ -37,6 +37,7 @@ const ProfilePage = () => {
   return (
     <div>
       <h1 className="mb-5">Profile</h1>
+      <pre>{JSON.stringify(user, null, 4)}</pre>
 
       <div className="flex space-x-2 pb-5">
         <img alt="profile" src={user.imageUrl || ''} className="h-8 w-8 my-auto rounded-full" />
@@ -80,6 +81,7 @@ const ProfilePage = () => {
           <Label className="mb-1" htmlFor="image">
             Update Profile Image
           </Label>
+
           <Input type="file" name="image" accept="image/png, image/jpeg" className="w-1/3" />
           {fetcher.data ? <P className="text-red-400 mt-1">{fetcher.data.error}</P> : null}
 
