@@ -45,7 +45,6 @@ const WorkplacePage = () => {
             {state === 'submitting' ? 'Uploading...' : 'Upload'}
           </Button>
         </fetcher.Form>
-
         <div className="grid grid-cols-5 gap-6 mt-6">
           {userImages.map((image) => (
             <CustomForm
@@ -69,6 +68,7 @@ const WorkplacePage = () => {
             </CustomForm>
           ))}
         </div>
+        EmailTemplate V E
       </div>
     </div>
   );

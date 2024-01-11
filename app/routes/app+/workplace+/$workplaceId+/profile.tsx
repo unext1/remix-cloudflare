@@ -1,6 +1,5 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { Form, useFetcher, useLoaderData, useLocation, useNavigation } from '@remix-run/react';
-import { eq } from 'drizzle-orm';
 import { $path } from 'remix-routes';
 import { z } from 'zod';
 import { zx } from 'zodix';
@@ -8,10 +7,13 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { P } from '~/components/ui/typography';
-import { db } from '~/db/client.server';
-import { userTable } from '~/db/schema';
-import { requireUser } from '~/services/auth.server';
 import { type action as imageAction } from '~/routes/api+/images+/$userId.profile-image';
+import { requireUser } from '~/services/auth.server';
+import { namedAction } from 'remix-utils/named-action';
+import { userTable } from '~/db/schema';
+import { eq } from 'drizzle-orm';
+import { db } from '~/db/client.server';
+import { SendMail } from '~/services/send-email.server';
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const user = await requireUser({ request, context });
@@ -21,11 +23,26 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const user = await requireUser({ context, request });
-  const { name } = await zx.parseForm(request, {
-    name: z.string().min(1)
-  });
 
-  return await db(context.env.DB).update(userTable).set({ name }).where(eq(userTable.id, user.id));
+  return namedAction(request, {
+    async change() {
+      const { name } = await zx.parseForm(request, {
+        name: z.string().min(1)
+      });
+      await db(context.env.DB).update(userTable).set({ name }).where(eq(userTable.id, user.id));
+      return json({});
+    },
+    async send() {
+      await SendMail({ context, subject: 'Atsiustas', id: '123' });
+      return json({ message: 'labas' });
+    }
+  });
+  // if (_action === 'change') {
+  //   return await db(context.env.DB).update(userTable).set({ name }).where(eq(userTable.id, user.id));
+  // }
+  // if (_action === 'send') {
+  //   return await SendMail({ context, subject: 'Atsiustas' });
+  // }
 }
 
 const ProfilePage = () => {
@@ -49,11 +66,19 @@ const ProfilePage = () => {
 
       <div className="space-y-4 ">
         <div>
-          <Label className="mb-1" htmlFor="name">
-            Email
-          </Label>
+          <Form method="post">
+            <Label className="mb-1" htmlFor="name">
+              Email
+            </Label>
 
-          <Input type="email" className="bg-card text-white md:w-fit" disabled value={user.email} />
+            <div className="flex w-full max-w-sm items-center space-x-2">
+              <Input type="email" className="bg-card text-white md:w-fit" disabled value={user.email} />
+
+              <Button type="submit" variant="default" size="sm" name="_action" value="send">
+                Send Email
+              </Button>
+            </div>
+          </Form>
         </div>
         <Form method="post">
           <Label className="mb-1" htmlFor="name">
@@ -67,7 +92,7 @@ const ProfilePage = () => {
               className="bg-card text-white md:w-fit"
               defaultValue={user.name || ''}
             />
-            <Button type="submit" variant="default" size="sm">
+            <Button type="submit" variant="default" size="sm" name="_action" value="change">
               Change Name
             </Button>
           </div>

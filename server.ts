@@ -16,7 +16,8 @@ const validateEnv = (env: unknown) => {
     CSRF_SECRET: z.string().min(1),
     GOOGLE_CLIENT_ID: z.string().min(1),
     GOOGLE_CLIENT_SECRET: z.string().min(1),
-    SITE_URL: z.string().min(1)
+    SITE_URL: z.string().min(1),
+    RESEND_API_KEY: z.string().min(1)
   });
 
   return envSchema.parse(env);

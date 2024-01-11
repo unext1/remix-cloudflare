@@ -13,7 +13,7 @@ export const Navigation = ({ user }: { user: UserType }) => {
   return (
     <nav className="overflow-auto flex-1 px-4 ">
       <div className="flex flex-col justify-between h-full">
-        <div className="mt-4">
+        <div>
           <Link to="/app">
             <h2 className="text-neutral-50 font-bold text-2xl">
               <span className="text-red-400">Lauva</span>
