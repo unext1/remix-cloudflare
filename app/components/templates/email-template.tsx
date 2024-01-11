@@ -1,8 +1,23 @@
-import { Body, Button, Container, Head, Html, Section, Text } from '@react-email/components';
+import {
+  Body,
+  Text,
+  Button,
+  Container,
+  Heading,
+  Html,
+  Section,
+  Row,
+  Column,
+  Head,
+  Tailwind,
+  Img,
+  render
+} from '@react-email/components';
 
-export function EmailTemplate() {
+export const EmailTemplate = () => {
   return (
     <Html className="bg-gray-50 h-screen flex justify-center items-center">
+      {/* <Tailwind> */}
       <Head />
       <Body className="bg-white shadow-xl p-8 rounded-xl max-w-md">
         <Container className="container my-8 mx-auto text-center text-black">
@@ -19,8 +34,16 @@ export function EmailTemplate() {
           </Section>
         </Container>
       </Body>
+      {/* </Tailwind> */}
     </Html>
   );
-}
+};
 
-export default EmailTemplate;
+// TO TEST!!:::
+// const aa = () => {
+//   const html = render(<EmailTemplate />);
+//   console.log(html);
+// };
+
+// aa();
+// npx tsx ./app/services/send-email.server.tsx
